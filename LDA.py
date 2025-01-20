@@ -9,8 +9,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
 
-
-
+from Model import X_train
 
 df = pd.read_csv("./dataIN/data.csv")
 print(df.info())
@@ -31,11 +30,13 @@ test_df = test_df - mean
 lda = LinearDiscriminantAnalysis(n_components=1)
 test_df = lda.fit_transform(test_df,y_df)
 
+X_train,X_test,y_train,y_test = train_test_split(test_df,y_df,test_size=0.2)
+
 # plot the scatterplot
 plt.scatter(
-    [x for x in range(test_df.shape[0])],test_df[:, 0],
-    c=y_df,
-    cmap='rainbow',
+    [x for x in range(y_test.shape[0])],X_test[:, 0],
+    c=y_test,
+    cmap='RdBu',
     alpha=0.7, edgecolors='b'
 )
 plt.show()

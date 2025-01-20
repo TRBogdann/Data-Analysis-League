@@ -14,6 +14,14 @@ from sklearn.model_selection import train_test_split
 df = pd.read_csv("./dataIN/data.csv")
 print(df.info())
 
+dragon_blue_wins = df[df["blueDragons"]==1]
+dragon_red_wins = df[df["redDragons"]==1]
+dragon_blue_wins = dragon_blue_wins[dragon_blue_wins["blueWins"]==1]
+dragon_red_wins = dragon_red_wins[dragon_red_wins["blueWins"]==0]
+dragon_matches = df[df["blueDragons"]==1].shape[0]+df[df["redDragons"]==1].shape[0]
+
+print("Procent castig(Dragon 10 min): "+str((dragon_blue_wins.shape[0]+dragon_red_wins.shape[0])/dragon_matches))
+
 
 dropped=["gameId","blueWins","blueEliteMonsters","redEliteMonsters","redFirstBlood","blueGoldDiff","redGoldDiff","blueExperienceDiff","redExperienceDiff","blueCSPerMin","redCSPerMin","blueGoldPerMin","redGoldPerMin","blueDeaths","redDeaths","blueAvgLevel","redAvgLevel"]
 #comunalitati sub 60%
@@ -64,7 +72,7 @@ fa.fit(efa_df)
 
 #Test 1 pentru determinarea numarului de factor: Criteriul lui Kaiser
 #Numarul de factori seminificative este numarul de valori proprii mai mari ca 0
-#Factori semnificativi criteriu Kaiser => 5
+#Factori semnificativi criteriu Kaiser => 4
 eigenvalues,eigenvectors = fa.get_eigenvalues()
 significant = len([x for x in eigenvalues if x>=1])
 print("Number of Significant Factors: "+ str(significant))
@@ -86,7 +94,7 @@ fa = FactorAnalyzer(n_factors=significant,rotation="varimax")
 fa.fit(efa_df)
 
 #III.a) Influenta Factorilor Asupra Atributelor
-t,ax = plt.subplots(figsize=(10,10))
+t,ax = plt.subplots(figsize=(20,20))
 corr_df = pd.DataFrame(fa.loadings_
                        ,index=efa_df.columns
                        ,columns=['F'+str(i+1) for i in range(significant)])
@@ -96,10 +104,12 @@ plt.show()
 
 #III.b)Varinta explicata de factori - ultimul element reprezinta varianta cumulativa
 #(in acest caz factorii explica 70% din varianta setului de date)
+print("Factor Variance:")
 print(fa.get_factor_variance())
 
 #III c) comunalitati
 communalities = fa.get_communalities()
+print("Comunalities")
 print(communalities)
 plt.figure(figsize=(50,50))
 plt.bar(efa_df.columns, communalities, color='skyblue', alpha=0.8)
@@ -110,13 +120,15 @@ plt.ylim(0, 1)  # Communalities are proportions between 0 and 1
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.show()
 
-efa = pd.DataFrame(fa.loadings_, columns=["F" + str(i + 1) for i in range(significant)])
+print("Loadings:")
 
+efa = pd.DataFrame(fa.loadings_, columns=["F" + str(i + 1) for i in range(significant)])
+print(corr_df)
 X_efa = pd.DataFrame(efa_df.to_numpy().dot(efa[["F1","F2","F3","F4"]].to_numpy()), columns=["F1","F2","F3","F4"])
 
 X_efa.index = y_df.index
 
-plt.scatter(X_efa["F1"], X_efa["F2"],c=y_df)
+plt.scatter(X_efa["F1"], X_efa["F2"],c=y_df,cmap='RdBu')
 plt.xlabel('F1')
 plt.ylabel('F2')
 plt.title('Factor Analysis')
@@ -124,7 +136,7 @@ plt.show()
 
 
 
-plt.scatter(X_efa["F1"], X_efa["F3"],c=y_df)
+plt.scatter(X_efa["F1"], X_efa["F3"],c=y_df,cmap='RdBu')
 plt.xlabel('F1')
 plt.ylabel('F3')
 plt.title('Factor Analysis')
@@ -132,17 +144,29 @@ plt.show()
 
 
 
-plt.scatter(X_efa["F2"], X_efa["F3"],c=y_df)
-plt.xlabel('F2')
-plt.ylabel('F3')
+
+
+plt.scatter(X_efa["F1"], X_efa["F4"],c=y_df,cmap='RdBu')
+plt.xlabel('F1')
+plt.ylabel('F4')
+plt.title('Factor Analysis')
+plt.show()
+
+plt.scatter(X_efa["F3"], X_efa["F4"],c=y_df,cmap='RdBu')
+plt.xlabel('F1')
+plt.ylabel('F4')
 plt.title('Factor Analysis')
 plt.show()
 
 fig = plt.figure(figsize=(12, 12))
 ax = fig.add_subplot(projection='3d')
-ax.scatter(X_efa["F1"], X_efa["F2"], X_efa["F3"],c=y_df)
+ax.scatter(X_efa["F1"], X_efa["F4"], X_efa["F3"],c=y_df,cmap='RdBu')
 plt.show()
 
+fig = plt.figure(figsize=(12, 12))
+ax = fig.add_subplot(projection='3d')
+ax.scatter(X_efa["F1"], X_efa["F2"], X_efa["F3"],c=y_df,cmap='RdBu')
+plt.show()
 
 X_efa["blueWins"] = y_df
 X_efa.to_csv("./dataOUT/"+filename,index=False)

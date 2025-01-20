@@ -25,7 +25,7 @@ import numpy as np
 #RandomForestClassifier
 #NaiveBayes
 
-index=["data","EFA3D","EFA4D","LDA","PCA2D","PCA3D","LDA_EFA","LDA_PCA"]
+index=["EFA3D","EFA4D","LDA","PCA2D","PCA3D"]
 
 Used = []
 Model = []

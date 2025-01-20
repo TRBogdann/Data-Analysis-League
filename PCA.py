@@ -2,17 +2,19 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.cluster.hierarchy import linkage, dendrogram
-from sklearn.cluster import AgglomerativeClustering
 
 
 df = pd.read_csv("./dataIN/data.csv")
 print(df.info())
-
+print(df.describe())
 
 dropped=["gameId","blueWins","blueEliteMonsters","redEliteMonsters","redFirstBlood","blueGoldDiff","redGoldDiff","blueExperienceDiff","redExperienceDiff","blueCSPerMin","redCSPerMin","blueGoldPerMin","redGoldPerMin","blueDeaths","redDeaths","blueAvgLevel","redAvgLevel"]
 print(df.shape)
 test_df = df.dropna().astype(float)
+
+t,ax = plt.subplots(figsize=(40,40))
+sns.heatmap(test_df.corr(),annot=True,vmin=-1,vmax=1,cmap="YlGnBu")
+plt.show()
 
 y_df = test_df["blueWins"]
 test_df = test_df.drop(columns=dropped)
@@ -56,8 +58,9 @@ col = ['PC'+str(i+1) for i in range(len(eigenvectors_sorted))]
 
 pc_df = pd.DataFrame(eigenvectors_sorted)
 pc_df.columns = col
-
+pc_df.index = test_df.columns
 print(pc_df)
+print(pc_df[["PC1","PC2","PC3"]])
 
 #valorile propri reprezinta variatia
 #aflam contributia componentelor ca ponderea valorilor proprii in suma acestora
@@ -74,10 +77,10 @@ plt.ylabel("Pondere")
 plt.title("Analiza componente principale")
 plt.show()
 
-#pc1 pc2 reprezinta 97% din varianta.
+#pc1 pc2 pc3 reprezinta 97% din varianta.
 #putem sa le folosim pentru a vizualiza datele
 #date proiectate. Formula X_proiectat = X * p
-#p matrice componente ales (in cazul asta pc1,pc2)
+#p matrice componente ales (in cazul asta pc1,pc2,pc3)
 
 X_pca2 = pd.DataFrame(test_df.dot(pc_df[["PC1","PC2"]].to_numpy()))
 X_pca = pd.DataFrame(test_df.dot(pc_df[["PC1",'PC2',"PC3"]].to_numpy()))
@@ -90,19 +93,19 @@ X_pca.index = y_df.index
 X_pca2.join(y_df).to_csv("./dataOUT/PCA2D.csv",index=False)
 X_pca.join(y_df).to_csv("./dataOUT/PCA3D.csv",index=False)
 
-plt.scatter(X_pca["PC1"], X_pca["PC2"],c=y_df)
+plt.scatter(X_pca["PC1"], X_pca["PC2"],c=y_df,cmap='RdBu')
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 2')
 plt.title('PCA Projection onto the First Two Principal Components')
 plt.show()
 
-plt.scatter(X_pca["PC1"], X_pca["PC3"],c=y_df)
+plt.scatter(X_pca["PC1"], X_pca["PC3"],c=y_df,cmap='RdBu')
 plt.xlabel('Principal Component 1')
 plt.ylabel('Principal Component 3')
 plt.title('PCA Projection onto the First Two Principal Components')
 plt.show()
 
-plt.scatter(X_pca["PC2"], X_pca["PC3"],c=y_df)
+plt.scatter(X_pca["PC2"], X_pca["PC3"],c=y_df,cmap='RdBu')
 plt.xlabel('Principal Component 2')
 plt.ylabel('Principal Component 3')
 plt.title('PCA Projection onto the First Two Principal Components')
@@ -110,6 +113,6 @@ plt.show()
 
 fig = plt.figure(figsize=(12, 12))
 ax = fig.add_subplot(projection='3d')
-ax.scatter(X_pca["PC1"], X_pca["PC2"], X_pca["PC3"],c=y_df)
+ax.scatter(X_pca["PC1"], X_pca["PC2"], X_pca["PC3"],c=y_df,cmap='RdBu')
 plt.show()
 
